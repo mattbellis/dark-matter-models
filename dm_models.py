@@ -534,3 +534,100 @@ def expected_number_of_WIMPs(wimp_model='shm',loE=0.0,hiE=5.0,loDay=0,hiDay=365,
     nwimps = integrate.dblquad(wimp,loE,hiE,lambda x: loDay,lambda x:hiDay, args=(target_atom,massDM,sigma_n,efficiency,wimp_model),epsabs=dblqtol)[0]*(target_mass)
 
     return nwimps
+
+
+
+################################################################################
+# Plot WIMP signal
+################################################################################
+def plot_wimp_energy(x,target_atom=AGe,massDM=10.0,sigma_n=1e-42,time_range=[1,365],model='shm'):
+
+    if not (model=='shm' or model=='stream' or model=='debris'):
+        print "Not correct model for plotting WIMP PDF!"
+        print "Model: ",model
+        exit(-1)
+
+    # For debris flow. (340 m/s)
+    vDeb1 = 340
+
+    # Assume that the energy passed in is in keVee
+    keVr = quench_keVee_to_keVr(x)
+
+    n = 0
+    for org_day in range(int(time_range[0]),int(time_range[1]),1):
+
+        day = (org_day+338)%365.0 #- 151
+
+        if model=='shm':
+            n += dRdErSHM(keVr,day,target_atom,massDM,sigma_n)
+        elif model=='debris':
+            n += dRdErDebris(keVr,day,target_atom,massDM,vDeb1,sigma_n)
+        elif model=='stream':
+            #The Sagitarius stream may intersect the solar system
+            vSag=300
+            v0Sag=100
+            vSagHat = np.array([0,0.233,-0.970])
+            vSagVec = np.array([vSag*vSagHat[0],vSag*vSagHat[1],vSag*vSagHat[2]])
+            streamVel = vSagVec
+            streamVelWidth = v0Sag
+            n += dRdErStream(keVr,day,target_atom,streamVel,streamVelWidth,massDM,sigma_n)
+
+    return n
+
+################################################################################
+
+def plot_wimp_day(org_day,target_atom=AGe,massDM=10.0,sigma_n=1e-42,e_range=[0.5,3.2],model='shm',vSag=300,v0Sag=100,vDeb1=340):
+
+    if not (model=='shm' or model=='stream' or model=='debris'):
+        print "Not correct model for plotting WIMP PDF!"
+        print "Model: ",model
+        exit(-1)
+
+    # For debris flow. (340 m/s)
+    #vDeb1 = 340
+
+    n = 0
+    day = (org_day+338)%365.0 #- 151
+    
+    if type(day)==np.ndarray:
+        
+        n = np.zeros(len(day))
+        for i,d in enumerate(day):
+            
+            x = np.linspace(e_range[0],e_range[1],100)
+            keVr = quench_keVee_to_keVr(x)
+
+            if model=='shm':
+                n[i] = (dRdErSHM(keVr,d,AGe,mDM,sigma_n)).sum()
+            elif model=='debris':
+                n[i] = (dRdErDebris(keVr,d,AGe,mDM,vDeb1,sigma_n)).sum()
+            elif model=='stream':
+                #The Sagitarius stream may intersect the solar system
+                #vSag=300
+                #v0Sag=100
+                vSagHat = np.array([0,0.233,-0.970])
+                vSagVec = np.array([vSag*vSagHat[0],vSag*vSagHat[1],vSag*vSagHat[2]])
+                streamVel = vSagVec
+                streamVelWidth = v0Sag
+                n[i] = (dRdErStream(keVr,d,AGe,streamVel,streamVelWidth,mDM,sigma_n)).sum()
+    else:
+        for x in np.linspace(e_range[0],e_range[1],100):
+
+            keVr = quench_keVee_to_keVr(x)
+
+            if model=='shm':
+                n += dRdErSHM(keVr,day,AGe,mDM,sigma_n)
+            elif model=='debris':
+                n += dRdErDebris(keVr,day,AGe,mDM,vDeb1,sigma_n)
+            elif model=='stream':
+                #The Sagitarius stream may intersect the solar system
+                #vSag=300
+                #v0Sag=100
+                vSagHat = np.array([0,0.233,-0.970])
+                vSagVec = np.array([vSag*vSagHat[0],vSag*vSagHat[1],vSag*vSagHat[2]])
+                streamVel = vSagVec
+                streamVelWidth = v0Sag
+                n += dRdErStream(keVr,day,AGe,streamVel,streamVelWidth,mDM,sigma_n)
+                
+    return n
+
