@@ -472,16 +472,79 @@ def dRdErDebris(Er,t,A,m,vflow,sigma_n):
 ################################################################################
 # WIMP signal
 ################################################################################
-def wimp(org_day,x,AGe,mDM,sigma_n,efficiency=None,model='shm',vDeb1=340,vSag=220,v0Sag=25,num_wimps=None):
+def wimp_Er_day(Er,day=1,target_atom=AGe,massDM=10.0,sigma_n=1e-42,quenching_factor=None,efficiency=None,model='shm',vDeb1=340,vSag=220,v0Sag=25,num_wimps=None):
+
+    # Er is the recoil energy.
 
     if not (model=='shm' or model=='stream' or model=='debris'):
         print "Not correct model for plotting WIMP PDF!"
         print "Model: ",model
         exit(-1)
 
-    # For debris flow. (340 m/s)
-    #vDeb1 = 340
+    # This is specifically for CoGeNT data taking. Starts at Dec 3. 
+    #day = (day+338)%365.0
 
+    #xkeVr = quench_keVee_to_keVr(x)
+    #xkeVr = x
+
+    if model=='shm':
+        dR = dRdErSHM(Er,day,AGe,mDM,sigma_n)
+    elif model=='debris':
+        dR = dRdErDebris(Er,day,AGe,mDM,vDeb1,sigma_n)
+    elif model=='stream':
+        #The Sagitarius stream may intersect the solar system
+        #vSag=300
+        #v0Sag=100
+        vSagHat = np.array([0,0.233,-0.970])
+        # IS THIS THE MAX???
+        #vSagHat = np.array([0.07247722,0.99486114,-0.07069913])
+        vSagVec = np.array([vSag*vSagHat[0],vSag*vSagHat[1],vSag*vSagHat[2]])
+        streamVel = vSagVec
+        streamVelWidth = v0Sag
+        dR = dRdErStream(Er,day,AGe,streamVel,streamVelWidth,mDM,sigma_n)
+
+    # Allow for an efficiency as a function of energy.
+    ############# THIS MIGHT NEED TO BE A FUNCTION OF dEee!!!!!!!!
+    eff = 1.0
+    if efficiency!=None:
+        eff = efficiency(Er)
+
+    dR *= eff
+    
+    # Need this because we've converted from one function to another.
+    #### dR/dEee = dR/dEr dEr
+    ####dEr_dEee = ((5.0**(1.0/1.12))/1.12)*(x**(-0.12/1.12))
+    ####print "dEr_dEee: ",dEr_dEee
+    #### Pass in for dEee (ionization energy)
+    #dEr_dEee = quench_dEr_dEee(x)
+    #dR *= dEr_dEee
+    Eee = None
+    dR_dEee = None
+    if quenching_factor is not None:
+        Eee,dEr_dEee = quenching_factor(Er)
+        dR_dEee = dR*dEr_dEee
+        
+
+    # Normalize
+    if num_wimps is not None:
+        dR /= num_wimps
+
+    return dR,dR_dEee,Eee
+
+
+################################################################################
+# WIMP signal
+################################################################################
+def wimp(org_day,x,AGe,mDM,sigma_n,efficiency=None,model='shm',vDeb1=340,vSag=220,v0Sag=25,num_wimps=None):
+
+    # x is the equivalent energy, *not* the recoil energy. Should probably change this. 
+
+    if not (model=='shm' or model=='stream' or model=='debris'):
+        print "Not correct model for plotting WIMP PDF!"
+        print "Model: ",model
+        exit(-1)
+
+    # This is specifically for CoGeNT data taking. Starts at Dec 3. 
     y = (org_day+338)%365.0
     #y = org_day
     xkeVr = quench_keVee_to_keVr(x)
@@ -503,6 +566,7 @@ def wimp(org_day,x,AGe,mDM,sigma_n,efficiency=None,model='shm',vDeb1=340,vSag=22
         streamVelWidth = v0Sag
         dR = dRdErStream(xkeVr,y,AGe,streamVel,streamVelWidth,mDM,sigma_n)
 
+    ############# THIS MIGHT NEED TO BE A FUNCTION OF dEee!!!!!!!!
     eff = 1.0
     if efficiency!=None:
         eff = efficiency(x)
