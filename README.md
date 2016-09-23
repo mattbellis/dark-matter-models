@@ -2,3 +2,7 @@
 
 # dark-matter-models
 Code to calculate PDFs and related quantities for WIMPs and other dark matter models. 
+
+
+# Binder
+[![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/repo/mattbellis/dark-matter-models)
