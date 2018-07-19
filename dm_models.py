@@ -477,8 +477,8 @@ def wimp_Er_day(Er,day=1,target_atom=AGe,massDM=10.0,sigma_n=1e-42,quenching_fac
     # Er is the recoil energy.
 
     if not (model=='shm' or model=='stream' or model=='debris'):
-        print "Not correct model for plotting WIMP PDF!"
-        print "Model: ",model
+        print("Not correct model for plotting WIMP PDF!")
+        print("Model: ",model)
         exit(-1)
 
     # This is specifically for CoGeNT data taking. Starts at Dec 3. 
@@ -540,8 +540,8 @@ def wimp(org_day,x,AGe,mDM,sigma_n,efficiency=None,model='shm',vDeb1=340,vSag=22
     # x is the equivalent energy, *not* the recoil energy. Should probably change this. 
 
     if not (model=='shm' or model=='stream' or model=='debris'):
-        print "Not correct model for plotting WIMP PDF!"
-        print "Model: ",model
+        print("Not correct model for plotting WIMP PDF!")
+        print("Model: ",model)
         exit(-1)
 
     # This is specifically for CoGeNT data taking. Starts at Dec 3. 
@@ -607,8 +607,8 @@ def expected_number_of_WIMPs(wimp_model='shm',loE=0.0,hiE=5.0,loDay=0,hiDay=365,
 def plot_wimp_energy(x,target_atom=AGe,massDM=10.0,sigma_n=1e-42,time_range=[1,365],model='shm'):
 
     if not (model=='shm' or model=='stream' or model=='debris'):
-        print "Not correct model for plotting WIMP PDF!"
-        print "Model: ",model
+        print("Not correct model for plotting WIMP PDF!")
+        print("Model: ",model)
         exit(-1)
 
     # For debris flow. (340 m/s)
@@ -643,8 +643,8 @@ def plot_wimp_energy(x,target_atom=AGe,massDM=10.0,sigma_n=1e-42,time_range=[1,3
 def plot_wimp_day(org_day,target_atom=AGe,massDM=10.0,sigma_n=1e-42,e_range=[0.5,3.2],model='shm',vSag=300,v0Sag=100,vDeb1=340):
 
     if not (model=='shm' or model=='stream' or model=='debris'):
-        print "Not correct model for plotting WIMP PDF!"
-        print "Model: ",model
+        print("Not correct model for plotting WIMP PDF!")
+        print("Model: ",model)
         exit(-1)
 
     # For debris flow. (340 m/s)
